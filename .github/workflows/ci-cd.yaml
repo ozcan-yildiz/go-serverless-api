@@ -70,7 +70,7 @@ jobs:
             docker pull 687249616289.dkr.ecr.eu-west-2.amazonaws.com/go-devops-api:latest
             
             # Run the new container
-            docker run -d -p 8080:8080 --name my-api 687249616289.dkr.ecr.eu-west-2.amazonaws.com/go-devops-api:latest
+            docker run -d --restart always -p 8080:8080 --name my-api 687249616289.dkr.ecr.eu-west-2.amazonaws.com/go-devops-api:latest
             
             # Cleanup unused images to save disk space
             docker image prune -f
