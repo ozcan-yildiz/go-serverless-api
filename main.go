@@ -13,7 +13,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		fmt.Fprintf(w, `
-			<h1>Hello! This is a DevOps-Ready Go API - Updated!!</h1>
+			<h1>Hello! This is a DevOps-Ready Go API</h1>
 			<p>Deployed via GitHub Actions CI/CD pipeline.</p>
 			<p><strong>Current Timestamp:</strong> %s</p>
 			<hr>
