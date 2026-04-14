@@ -1,29 +1,34 @@
-# Go DevOps Project: CI/CD Pipeline with AWS EC2 & Docker
+# Go Serverless API: CI/CD Pipeline with AWS Lambda & ECR
 
-This is a simple Go application that demonstrates a complete DevOps lifecycle. The goal was to build a classic, reliable CI/CD pipeline using industry-standard tools.
+This project demonstrates a modern, scalable, and cost-effective **Serverless** architecture using Go. Unlike traditional server-based deployments, this application runs as a functional unit that scales automatically and only incurs costs when executed.
 
 ### Project Overview
-The application is a basic Go web server, but the focus is on the infrastructure. I used a **container-first approach** to ensure the app runs the same everywhere.
+The goal was to transition from an EC2-based (Server-full) architecture to a **Serverless (Lambda)** approach. The application is containerized using Docker and deployed to AWS Lambda, providing a high-availability environment without the overhead of managing underlying servers.
 
 ### Tech Stack & Tools
 * **Language:** Go (Golang)
-* **Containerization:** Docker
+* **Architecture:** Serverless
+* **Containerization:** Docker (Multi-stage builds)
 * **Registry:** AWS ECR (Elastic Container Registry)
-* **Compute:** AWS EC2 (Ubuntu Instance)
+* **Compute:** AWS Lambda
 * **CI/CD:** GitHub Actions
 
 ### How the Pipeline Works
-I designed the CI/CD flow to be fully automated:
+The deployment is fully automated to ensure "Zero-Touch" delivery:
 
-1.  **Continuous Integration:** Every time I push code to the `main` branch, GitHub Actions triggers a workflow. It sets up the Go environment and runs unit tests to make sure everything is okay.
-2.  **Containerization:** After successful tests, the app is Dockerized. The image is then pushed to **AWS ECR** with a unique tag.
-3.  **Continuous Deployment:** Finally, the pipeline connects to my **AWS EC2** instance via SSH. It pulls the latest image from ECR, stops the old container, and starts the new one.
+1.  **Code Push:** Developers push code to the `main` branch.
+2.  **Container Build:** GitHub Actions builds a specialized Docker image optimized for the **AWS Lambda Provided AL2** runtime.
+3.  **Image Push:** The container image is pushed to **AWS ECR** with the `latest` tag.
+4.  **Lambda Update:** The pipeline uses the AWS CLI to trigger a `UpdateFunctionCode` command, telling Lambda to pull and deploy the new image from ECR.
 
-### Security & Configuration
-Security was a key part of this setup. **All sensitive data like AWS keys and SSH credentials are securely managed via GitHub Secrets to ensure no private information is exposed in the source code.** Additionally, I implemented **IAM Roles** on the EC2 instance to grant it read-only access to ECR, following the **Principle of Least Privilege**.
+### Security & IAM Governance
+Infrastructure security was prioritized by implementing granular access controls:
+* **GitHub Secrets:** All AWS credentials are encrypted and never hardcoded.
+* **Resource-Based Policies:** Implemented specific ECR Repository Policies to allow Lambda to securely pull images.
+* **Least Privilege:** The IAM user and Lambda execution role are restricted to only the necessary actions (`ecr:BatchGetImage`, `lambda:UpdateFunctionCode`, etc.).
 
 ### Key Features
-* **Automated Testing:** No code goes to production without passing tests.
-* **Secure Access:** Used IAM Roles for EC2-to-ECR communication instead of hardcoding credentials.
-* **Least Privilege:** All AWS policies are restricted to only what is necessary.
-* **Zero Manual Work:** From code push to live URL, everything is automated.
+* **Cost Efficiency:** No idle server costs; you only pay per request.
+* **Scalability:** AWS Lambda handles thousands of concurrent requests automatically.
+* **Containerized Portability:** Using Docker for Lambda ensures the local development environment matches production exactly.
+* **Automated Recovery:** AWS manages the infrastructure; if a function fails, the system is self-healing.
