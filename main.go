@@ -1,43 +1,40 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"net/http"
-	"time"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 )
 
-func main() {
-	// Root Endpoint with HTML Links
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		fmt.Fprintf(w, `
-			<h1>Hello! This is a DevOps-Ready Go API -para Oscar</h1>
-			<p>Deployed via GitHub Actions CI/CD pipeline.</p>
-			<p><strong>Current Timestamp:</strong> %s</p>
-			<hr>
-			<h3>Explore DevOps Endpoints:</h3>
-			<ul>
-				<li><a href="/health">/health</a> - Check application status</li>
-				<li><a href="/metrics">/metrics</a> - View Prometheus raw metrics</li>
-			</ul>
-		`, time.Now().Format(time.RFC1123))
-	})
+var adapter *httpadapter.HandlerAdapter
 
-	// Health Check Endpoint
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+func init() {
+	// Standart Go Route'larını burada tanımlıyoruz
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("Healthy"))
+		w.Write([]byte("Hello! This is a Serverless Go API running on AWS Lambda 🚀"))
 	})
 
-	// Metrics Endpoint
-	http.Handle("/metrics", promhttp.Handler())
+	mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Serverless project is healthy!"))
+	})
 
-	fmt.Println("Server is starting on port 8080...")
+	// Standart HTTP Mux'ı Lambda'nın anlayacağı dile çeviren adaptör
+	adapter = httpadapter.New(mux)
+}
 
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		fmt.Printf("Error starting server: %s\n", err)
-	}
+func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// Gelen isteği al, adaptörden geçir ve sonucu dön
+	return adapter.ProxyWithContext(ctx, req)
+}
+
+func main() {
+	// Lambda runtime bu satırı bekler
+	lambda.Start(Handler)
 }
