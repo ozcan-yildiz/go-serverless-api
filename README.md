@@ -1,34 +1,37 @@
-# Go Serverless API: CI/CD Pipeline with AWS Lambda & ECR
+# Go Serverless API: End-to-End Production Architecture
 
-This project demonstrates a modern, scalable, and cost-effective **Serverless** architecture using Go. Unlike traditional server-based deployments, this application runs as a functional unit that scales automatically and only incurs costs when executed.
+This project demonstrates a fully automated, production-grade **Serverless** architecture. It covers the entire lifecycle of a Go application, from containerization and CI/CD to custom domain management with SSL/TLS termination.
 
-### Project Overview
-The goal was to transition from an EC2-based (Server-full) architecture to a **Serverless (Lambda)** approach. The application is containerized using Docker and deployed to AWS Lambda, providing a high-availability environment without the overhead of managing underlying servers.
+### 🌐 Live Endpoint
+The API is globally accessible at: `https://api.atlascon.co.uk`
 
-### Tech Stack & Tools
-* **Language:** Go (Golang)
-* **Architecture:** Serverless
-* **Containerization:** Docker (Multi-stage builds)
-* **Registry:** AWS ECR (Elastic Container Registry)
-* **Compute:** AWS Lambda
-* **CI/CD:** GitHub Actions
+### 🏗️ Advanced Architecture
+Beyond simple function execution, this project implements a complete cloud networking stack:
 
-### How the Pipeline Works
-The deployment is fully automated to ensure "Zero-Touch" delivery:
+* **API Gateway (HTTP API):** Acts as the managed entry point, handling request routing to the Lambda function.
+* **Route 53 (DNS):** Managed DNS records using **Alias** records to point a professional subdomain (`api.atlascon.co.uk`) to the AWS infrastructure.
+* **AWS Certificate Manager (ACM):** Provisioned and validated SSL/TLS certificates to ensure all traffic is encrypted via HTTPS.
+* **Lambda & ECR:** Container-based serverless execution using Go 1.x runtime on Amazon Linux 2.
 
-1.  **Code Push:** Developers push code to the `main` branch.
-2.  **Container Build:** GitHub Actions builds a specialized Docker image optimized for the **AWS Lambda Provided AL2** runtime.
-3.  **Image Push:** The container image is pushed to **AWS ECR** with the `latest` tag.
-4.  **Lambda Update:** The pipeline uses the AWS CLI to trigger a `UpdateFunctionCode` command, telling Lambda to pull and deploy the new image from ECR.
 
-### Security & IAM Governance
-Infrastructure security was prioritized by implementing granular access controls:
-* **GitHub Secrets:** All AWS credentials are encrypted and never hardcoded.
-* **Resource-Based Policies:** Implemented specific ECR Repository Policies to allow Lambda to securely pull images.
-* **Least Privilege:** The IAM user and Lambda execution role are restricted to only the necessary actions (`ecr:BatchGetImage`, `lambda:UpdateFunctionCode`, etc.).
 
-### Key Features
-* **Cost Efficiency:** No idle server costs; you only pay per request.
-* **Scalability:** AWS Lambda handles thousands of concurrent requests automatically.
-* **Containerized Portability:** Using Docker for Lambda ensures the local development environment matches production exactly.
-* **Automated Recovery:** AWS manages the infrastructure; if a function fails, the system is self-healing.
+### 🚀 CI/CD Pipeline Flow
+The automation remains the heart of the project:
+1.  **Build:** GitHub Actions triggers on every push to `main`.
+2.  **Containerize:** Multi-stage Docker build creates a minimal footprint image.
+3.  **Deploy:** The image is pushed to **AWS ECR**, and the **Lambda** function is updated via AWS CLI.
+4.  **Instant Availability:** Changes are immediately reflected behind the **API Gateway** and custom domain.
+
+### 🔐 Security & Governance
+* **Granular IAM Policies:** Implemented least-privilege access for the GitHub deployer and the Lambda execution role.
+* **Resource-Based Policies:** Configured ECR to allow cross-service access specifically for the Lambda service.
+* **Zero-Downtime Updates:** Lambda's versioning ensures the API stays online during deployments.
+
+### 🛠️ Key Technical Skills Demonstrated
+* **Cloud Networking:** Configuring DNS A-records, Alias targets, and CNAMEs.
+* **Security:** Managing SSL certificates and HTTPS enforcement.
+* **Serverless Orchestration:** Connecting multiple AWS services (Route 53 -> API Gateway -> Lambda -> ECR) into a cohesive system.
+* **DevOps Best Practices:** Decoupling infrastructure from code while maintaining full automation.
+
+---
+*Developed as part of a professional cloud engineering portfolio.*
